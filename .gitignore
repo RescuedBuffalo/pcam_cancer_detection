@@ -218,8 +218,6 @@ results/
 *.csv
 
 # Keep these files local only (not in git)
-modeling.ipynb
-requirements.txt
 MODELING_GUIDE.md
 MEMORY_OPTIMIZATION.md
 cancer-detection-eda-plan.plan.md
