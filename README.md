@@ -17,6 +17,8 @@ Identify metastatic cancer tissue in histopathology images using deep learning m
 ├── modeling.ipynb            # Model training and evaluation
 ├── requirements.txt          # Python dependencies
 ├── MODELING_GUIDE.md         # Detailed modeling reference
+├── RESIZE_GUIDE.md           # Image resizing trade-offs (96×96 vs 224×224)
+├── TRAINING_STRATEGY.md      # Efficient training approach (quick mode + focused training)
 ├── cancer-detection-eda-plan.plan.md  # Project plan
 └── data/                     # Dataset files (HDF5 and CSV)
 ```
@@ -82,15 +84,15 @@ python -m ipykernel install --user --name=cancer-env
    - Establishes performance lower bound
    - ~1.2M trainable parameters
 
-2. **Transfer Learning - ResNet50**
-   - ImageNet pre-trained weights
-   - Two-phase training: frozen base → fine-tuning
-   - ~25M parameters (2M trainable when frozen)
+2. **ResNet50 Architecture**
+   - Trained from scratch (96×96 too small for ImageNet transfer)
+   - Deep residual architecture with skip connections
+   - ~25M parameters
 
-3. **Transfer Learning - EfficientNetB0**
-   - More efficient architecture than ResNet
-   - Similar two-phase approach
-   - ~5M parameters
+3. **EfficientNet-Inspired Model**
+   - Custom architecture inspired by EfficientNet
+   - Optimized for 96×96 input size
+   - ~2-3M parameters
 
 4. **Vision-Language Model (VLM) - Optional**
    - CLIP zero-shot classification
@@ -102,9 +104,13 @@ python -m ipykernel install --user --name=cancer-env
    - Improves robustness
 
 **Architecture Rationale:**
-- Transfer learning justified by medical image similarity to natural images
-- Pre-trained ImageNet weights provide excellent initialization
-- Two-phase fine-tuning: frozen base (LR=1e-3) → unfreeze last layers (LR=1e-5)
+- **Image Size Options**: 
+  - Default 96×96: Faster training, must train from scratch
+  - Optional 224×224 resizing: Enables ImageNet transfer learning, ~5% better accuracy
+  - See `RESIZE_GUIDE.md` for detailed comparison
+- **Training from scratch** (96×96) vs **Transfer learning** (224×224) trade-offs considered
+- **Deep architectures** (ResNet50, custom EfficientNet) beneficial for feature learning
+- **Strong augmentation** compensates for lack of transfer learning (when training from scratch)
 - VLM approach demonstrates novel multi-modal integration
 
 **Data Cleaning:**
@@ -115,21 +121,27 @@ python -m ipykernel install --user --name=cancer-env
 3. Final cleaned dataset: ~95% of original (still 250K+ images)
 
 **Data Preprocessing:**
-1. Normalization: Simple [0,1] scaling
-2. Data Augmentation:
+1. Optional Resizing: 96×96 → 224×224 (enables ImageNet transfer learning)
+2. Normalization: Simple [0,1] scaling
+3. Data Augmentation:
    - Rotation: 180° (rotation-invariant tissue)
    - Horizontal/vertical flips
    - Zoom: ±10%
    - Brightness: ±10% (simulates staining variation)
    - Width/height shift: ±10%
-3. No class balancing needed (already balanced after cleaning)
+4. No class balancing needed (already balanced after cleaning)
 
 **Training Configuration:**
-- Batch size: 64
+- Batch size: 64 (96×96) or 32 (224×224) - auto-adjusted
 - Optimizer: Adam
 - Loss: Binary cross-entropy
 - Primary metric: AUC-ROC (Kaggle metric)
 - Callbacks: EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
+
+**Efficient Training Strategy** (see `TRAINING_STRATEGY.md` for details):
+- **Quick Mode** (20K samples): Fast iteration and debugging (~2-3 mins/epoch)
+- **Full Mode** (250K samples): Final training overnight (~15 mins/epoch)
+- **Recommended**: Train baseline + one main model (don't overtrain multiple models)
 
 ## Results
 
