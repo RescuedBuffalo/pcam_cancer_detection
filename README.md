@@ -82,36 +82,24 @@ python -m ipykernel install --user --name=cancer-env
 1. **Simple CNN Baseline**
    - 4 convolutional blocks with batch norm and dropout
    - Establishes performance lower bound
-   - ~1.2M trainable parameters
+   - ~522K trainable parameters
 
-2. **ResNet50 Architecture**
-   - Trained from scratch (96×96 too small for ImageNet transfer)
-   - Deep residual architecture with skip connections
-   - ~25M parameters
-
-3. **EfficientNet-Inspired Model**
+2. **EfficientNet-Inspired Model**
    - Custom architecture inspired by EfficientNet
    - Optimized for 96×96 input size
-   - ~2-3M parameters
+   - ~522K parameters
 
-4. **Vision-Language Model (VLM) - Optional**
-   - CLIP zero-shot classification
-   - Novel multi-modal approach
-   - No training required
-
-5. **Ensemble**
-   - Weighted combination of best CNN + VLM
-   - Improves robustness
+3. **EfficientNet + CBAM Attention** ⭐
+   - EfficientNet architecture with CBAM attention modules
+   - Channel + Spatial attention mechanisms
+   - Focuses on tumor regions (99.5% are centered)
+   - ~528K trainable parameters
 
 **Architecture Rationale:**
-- **Image Size Options**: 
-  - Default 96×96: Faster training, must train from scratch
-  - Optional 224×224 resizing: Enables ImageNet transfer learning, ~5% better accuracy
-  - See `RESIZE_GUIDE.md` for detailed comparison
-- **Training from scratch** (96×96) vs **Transfer learning** (224×224) trade-offs considered
-- **Deep architectures** (ResNet50, custom EfficientNet) beneficial for feature learning
-- **Strong augmentation** compensates for lack of transfer learning (when training from scratch)
-- VLM approach demonstrates novel multi-modal integration
+- **Lightweight models**: All models ~500K parameters for fast training on CPU/M3
+- **Training from scratch**: 96×96 images optimized for histopathology
+- **Attention mechanisms**: CBAM leverages centered tumor finding from EDA
+- **Strong augmentation**: Compensates for training from scratch and handles staining variation
 
 **Data Cleaning:**
 1. Duplicate Removal: Remove images with identical statistical fingerprints (~4-5%)
@@ -148,40 +136,41 @@ python -m ipykernel install --user --name=cancer-env
 **Status**: Models ready to train
 
 ### Model Performance Comparison
-| Model | AUC-ROC | Accuracy | Training Time |
-|-------|---------|----------|---------------|
-| Simple CNN | TBD | TBD | TBD |
-| ResNet50 | TBD | TBD | TBD |
-| EfficientNetB0 | TBD | TBD | TBD |
-| VLM (CLIP) | TBD | TBD | N/A (zero-shot) |
-| Ensemble | TBD | TBD | TBD |
+| Model | AUC-ROC | Accuracy | Parameters | Training Time |
+|-------|---------|----------|------------|---------------|
+| Simple CNN | TBD | TBD | 522K | ~3 min/epoch |
+| EfficientNet | TBD | TBD | 522K | ~3 min/epoch |
+| EfficientNet + CBAM ⭐ | TBD | TBD | 528K | ~4 min/epoch |
 
 **Kaggle Leaderboard**: [Screenshot TBD]
 
 ## Key Learnings
 
 **What Worked:**
-- Transfer learning significantly outperformed baseline
-- Strong data augmentation prevented overfitting
-- EDA-driven decisions (no class weights, aggressive augmentation)
+- Lightweight models (~500K params) train fast on MacBook Pro M3
+- CBAM attention mechanisms leverage EDA finding (99.5% centered tumors)
+- Strong data augmentation prevents overfitting
+- EDA-driven decisions (balanced dataset, centered tumors)
 
 **Challenges:**
 - Staining variation across different WSI sources
 - Subtle differences between tumor and normal tissue
+- Training from scratch without ImageNet weights
 
 **Novel Contributions:**
-- VLM zero-shot baseline demonstrates multi-modal approach
+- CBAM attention applied to histopathology (visualizable attention maps)
 - Comprehensive 9-point data quality analysis
-- Center region analysis informing architecture decisions
+- Center region analysis informing architecture decisions (99.5% centered)
 
 ## Future Improvements
 
-1. **Attention Mechanisms**: Leverage the fact that 99.5% of tumors are centered
+1. **More Attention Mechanisms**: Try Squeeze-and-Excitation, Self-Attention
 2. **Vision Transformers**: Try ViT or Swin Transformer architectures
 3. **Stain Normalization**: Reduce impact of color variation
 4. **Multi-scale Analysis**: Use multiple patch sizes
 5. **External Validation**: Test on other histopathology datasets
 6. **Test-Time Augmentation**: Average predictions over augmented versions
+7. **Ensemble Methods**: Combine multiple CBAM models with different seeds
 
 ## References
 
