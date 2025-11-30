@@ -15,12 +15,10 @@ Identify metastatic cancer tissue in histopathology images using deep learning m
 ```
 ├── EDA.ipynb                 # Comprehensive exploratory data analysis
 ├── modeling.ipynb            # Model training and evaluation
+├── report.ipynb              # Overview notebook that lightly samples for illustrative purposes
 ├── requirements.txt          # Python dependencies
-├── MODELING_GUIDE.md         # Detailed modeling reference
-├── RESIZE_GUIDE.md           # Image resizing trade-offs (96×96 vs 224×224)
-├── TRAINING_STRATEGY.md      # Efficient training approach (quick mode + focused training)
-├── cancer-detection-eda-plan.plan.md  # Project plan
-└── data/                     # Dataset files (HDF5 and CSV)
+├── data/                     # Dataset files (HDF5 and CSV)
+└── results/                  # Folder with output results (not pushed to git)
 ```
 
 ## Setup
