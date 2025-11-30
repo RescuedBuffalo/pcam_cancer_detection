@@ -15,12 +15,10 @@ Identify metastatic cancer tissue in histopathology images using deep learning m
 ```
 ├── EDA.ipynb                 # Comprehensive exploratory data analysis
 ├── modeling.ipynb            # Model training and evaluation
+├── report.ipynb              # Overview notebook that lightly samples for illustrative purposes
 ├── requirements.txt          # Python dependencies
-├── MODELING_GUIDE.md         # Detailed modeling reference
-├── RESIZE_GUIDE.md           # Image resizing trade-offs (96×96 vs 224×224)
-├── TRAINING_STRATEGY.md      # Efficient training approach (quick mode + focused training)
-├── cancer-detection-eda-plan.plan.md  # Project plan
-└── data/                     # Dataset files (HDF5 and CSV)
+├── data/                     # Dataset files (HDF5 and CSV)
+└── results/                  # Folder with output results (not pushed to git)
 ```
 
 ## Setup
@@ -70,10 +68,10 @@ python -m ipykernel install --user --name=cancer-env
 7. **Data Augmentation Preview**: Tested rotation, flip, zoom, brightness
 
 **Key EDA Findings:**
-- ✅ Clean, high-quality dataset - no preprocessing needed
-- ✅ Balanced classes - no need for class weights
-- ✅ Centered tumors - attention mechanisms could help
-- ✅ Staining variation - strong augmentation recommended
+- Clean, high-quality dataset - no preprocessing needed
+- Balanced classes - no need for class weights
+- Centered tumors - attention mechanisms could help
+- Staining variation - strong augmentation recommended
 
 ### 2. Model Architecture (modeling.ipynb)
 
@@ -89,7 +87,7 @@ python -m ipykernel install --user --name=cancer-env
    - Optimized for 96×96 input size
    - ~522K parameters
 
-3. **EfficientNet + CBAM Attention** ⭐
+3. **EfficientNet + CBAM Attention**
    - EfficientNet architecture with CBAM attention modules
    - Channel + Spatial attention mechanisms
    - Focuses on tumor regions (99.5% are centered)
@@ -125,72 +123,3 @@ python -m ipykernel install --user --name=cancer-env
 - Loss: Binary cross-entropy
 - Primary metric: AUC-ROC (Kaggle metric)
 - Callbacks: EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
-
-**Efficient Training Strategy** (see `TRAINING_STRATEGY.md` for details):
-- **Quick Mode** (20K samples): Fast iteration and debugging (~2-3 mins/epoch)
-- **Full Mode** (250K samples): Final training overnight (~15 mins/epoch)
-- **Recommended**: Train baseline + one main model (don't overtrain multiple models)
-
-## Results
-
-**Status**: Models ready to train
-
-### Model Performance Comparison
-| Model | AUC-ROC | Accuracy | Parameters | Training Time |
-|-------|---------|----------|------------|---------------|
-| Simple CNN | TBD | TBD | 522K | ~3 min/epoch |
-| EfficientNet | TBD | TBD | 522K | ~3 min/epoch |
-| EfficientNet + CBAM ⭐ | TBD | TBD | 528K | ~4 min/epoch |
-
-**Kaggle Leaderboard**: [Screenshot TBD]
-
-## Key Learnings
-
-**What Worked:**
-- Lightweight models (~500K params) train fast on MacBook Pro M3
-- CBAM attention mechanisms leverage EDA finding (99.5% centered tumors)
-- Strong data augmentation prevents overfitting
-- EDA-driven decisions (balanced dataset, centered tumors)
-
-**Challenges:**
-- Staining variation across different WSI sources
-- Subtle differences between tumor and normal tissue
-- Training from scratch without ImageNet weights
-
-**Novel Contributions:**
-- CBAM attention applied to histopathology (visualizable attention maps)
-- Comprehensive 9-point data quality analysis
-- Center region analysis informing architecture decisions (99.5% centered)
-
-## Future Improvements
-
-1. **More Attention Mechanisms**: Try Squeeze-and-Excitation, Self-Attention
-2. **Vision Transformers**: Try ViT or Swin Transformer architectures
-3. **Stain Normalization**: Reduce impact of color variation
-4. **Multi-scale Analysis**: Use multiple patch sizes
-5. **External Validation**: Test on other histopathology datasets
-6. **Test-Time Augmentation**: Average predictions over augmented versions
-7. **Ensemble Methods**: Combine multiple CBAM models with different seeds
-
-## References
-
-- PatchCamelyon Dataset: https://github.com/basveeling/pcam
-- Kaggle Competition: https://www.kaggle.com/c/histopathologic-cancer-detection
-- Original Paper: Veeling et al. (2018) "Rotation Equivariant CNNs for Digital Pathology"
-
-## Next Steps
-
-1. ✅ Complete comprehensive EDA
-2. ✅ Create modeling notebook with multiple architectures
-3. ⏳ Train all models and compare results
-4. ⏳ Generate test set predictions
-5. ⏳ Submit to Kaggle leaderboard
-6. ⏳ Capture leaderboard screenshot
-7. ⏳ Document final results and learnings
-
-## Project Timeline
-
-- **Week 1**: Environment setup, data loading, EDA ✅
-- **Week 2**: Model implementation, training experiments ⏳
-- **Week 3**: Optimization, ensemble, submission ⏳
-- **Week 4**: Documentation, presentation, final delivery ⏳
